@@ -10,7 +10,6 @@ import shutil
 import argparse
 
 def md5(filename):
-    """ファイルを読んでMD5ハッシュダイジェストを返す"""
 	with open(filename, "rb") as f:
 		data = f.read()
 	return hashlib.md5(data).hexdigest()
