@@ -14,10 +14,10 @@ def md5(filename):
 		data = f.read()
 	return hashlib.md5(data).hexdigest()
 
-def take_picture(direction, initTime, intervalTime, path):
+def take_picture(direction, init_time, interval_time, path):
     """画面が変化しなくなるまでスクリーンショットを撮る"""
     shell = win32com.client.Dispatch("WScript.Shell")
-    time.sleep(initTime)
+    time.sleep(init_time)
     img = ImageGrab.grab()
 
     spread_path = path + "/spread_image/"
@@ -27,7 +27,7 @@ def take_picture(direction, initTime, intervalTime, path):
     i = 2
     while(1):
         shell.SendKeys(direction)
-        time.sleep(intervalTime)
+        time.sleep(interval_time)
         img = ImageGrab.grab()
         img.save(spread_path + str(i)+".png")
 
@@ -40,6 +40,7 @@ def take_picture(direction, initTime, intervalTime, path):
 
 def split_image(path, direction = "RIGHT"):
     """画像を横に２分割する"""
+    print("start to split images")
     spread_path = path + "/spread_image/"
     files = os.listdir(spread_path)
     split_path = path + "/split_image/"
@@ -47,6 +48,7 @@ def split_image(path, direction = "RIGHT"):
     # ファイルの長さを考慮に入れて数値順にファイルをソートする
     sorted_files = sorted(files, key=lambda x: (len(x), x))
     for file in sorted_files:
+        print(file)
         img = Image.open(spread_path + file)
         index, ext = file.split(".")
         if direction == "RIGHT":
@@ -61,6 +63,7 @@ def split_image(path, direction = "RIGHT"):
 
 def trim(path):
     """余白を消去する"""
+    print("start to trim images")
     split_path = path + "/split_image/"
     files = os.listdir(split_path)
     trim_path = path + "/trim_images/"
@@ -68,6 +71,7 @@ def trim(path):
     # ファイルの長さを考慮に入れて数値順にファイルをソート
     sorted_files = sorted(files, key=lambda x: (len(x), x))
     for file in sorted_files:
+        print(file)
         img = Image.open(split_path + file)
         bg = Image.new(img.mode, img.size, img.getpixel((0,0)))
         diff = ImageChops.difference(img, bg)
@@ -79,30 +83,31 @@ def trim(path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="This script is to automate screen shot function")
-    parser.add_argument("dstPath", help="出力するファイルのパスを指定する。")
-    parser.add_argument("instruction", help="キーボードの命令を指定する。←なら'{LEFT}'を指定する")
-    parser.add_argument("openingDirection", help="見開き方向を指定する。右開きなら'RIGHT'を指定する")
-    parser.add_argument("initTime", nargs='?',
-                        help="プログラムが最初に実行されるまでの時間を指定する(秒)", type=int)
-    parser.add_argument("intervalTime", nargs='?',
-                        help="命令を送る間隔を指定する", type=int)
+    parser.add_argument("dst_path", help="出力するファイルのパスを指定する。")
+    parser.add_argument("instruction", help="キーボードの命令をwin32APIで指定する。←なら'{LEFT}'を指定する")
+    parser.add_argument("opening_direction", help="見開き方向を指定する。右開きなら'RIGHT'を指定する")
+    parser.add_argument("init_time", nargs='?',
+                        help="プログラムが最初に実行されるまでの時間を指定する(秒)", type=float)
+    parser.add_argument("interval_time", nargs='?',
+                        help="命令を送る間隔を指定する(秒)", type=float)
     parser.add_argument("--zip",
                         help="指定すると最終的な出力ファイルを圧縮して出力する",
                         action="store_true",)
     
     args = parser.parse_args()
 
-    if args.initTime:
-        initTime = args.initTime
+    if args.init_time:
+        init_time = args.init_time
     else:
-        initTime = 10
+        init_time = 10
 
-    if args.intervalTime:
-        intervalTime = args.intervalTime
+    if args.interval_time:
+        interval_time = args.interval_time
     else:
-        intervalTime = 0.5
+        interval_time = 0.5
     
-    take_picture(args.instruction, initTime, intervalTime, args.dstPath)
-    split_image(args.dstPath, args.openingDirection)
-    trim_img = trim(args.dstPath)
-    shutil.make_archive(args.dstPath+"/complete", 'zip', args.dstPath + "/trim_images")
+    take_picture(args.instruction, init_time, interval_time, args.dst_path)
+    
+    split_image(args.dst_path, args.opening_direction)
+    trim_img = trim(args.dst_path)
+    shutil.make_archive(args.dst_path+"/complete", 'zip', args.dst_path + "/trim_images")
