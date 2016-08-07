@@ -66,7 +66,7 @@ def trim(path):
     print("start to trim images")
     split_path = path + "/split_image/"
     files = os.listdir(split_path)
-    trim_path = path + "/trim_images/"
+    trim_path = path + "/trim_image/"
     os.mkdir(trim_path)
     # ファイルの長さを考慮に入れて数値順にファイルをソート
     sorted_files = sorted(files, key=lambda x: (len(x), x))
@@ -82,16 +82,19 @@ def trim(path):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="This script is to automate screen shot function")
+    parser = argparse.ArgumentParser(description="This script is to automate screen shots")
     parser.add_argument("dst_path", help="出力するファイルのパスを指定する。")
-    parser.add_argument("instruction", help="キーボードの命令をwin32APIで指定する。←なら'{LEFT}'を指定する")
+    parser.add_argument("instruction", help="キーボードの命令をwin32API(SendKey)で指定する。←なら'{LEFT}'を指定する")
     parser.add_argument("opening_direction", help="見開き方向を指定する。右開きなら'RIGHT'を指定する")
     parser.add_argument("init_time", nargs='?',
                         help="プログラムが最初に実行されるまでの時間を指定する(秒)", type=float)
     parser.add_argument("interval_time", nargs='?',
                         help="命令を送る間隔を指定する(秒)", type=float)
     parser.add_argument("--zip",
-                        help="指定すると最終的な出力ファイルを圧縮して出力する",
+                        help="最終的な出力ファイルを圧縮して出力する",
+                        action="store_true",)
+    parser.add_argument("--trim",
+                        help="画像の分割とトリミングを行う",
                         action="store_true",)
     
     args = parser.parse_args()
@@ -107,7 +110,14 @@ if __name__ == "__main__":
         interval_time = 0.5
     
     take_picture(args.instruction, init_time, interval_time, args.dst_path)
-    
-    split_image(args.dst_path, args.opening_direction)
-    trim_img = trim(args.dst_path)
-    shutil.make_archive(args.dst_path+"/complete", 'zip', args.dst_path + "/trim_images")
+    # ファイルの加工
+    if args.trim:
+        split_image(args.dst_path, args.opening_direction)
+        trim_img = trim(args.dst_path)
+    # zipで圧縮
+    if args.zip and args.trim:
+        shutil.make_archive(args.dst_path+"/trim_complete", 'zip', args.dst_path + "/trim_image")
+    elif args.zip and not args.trim:
+        shutil.make_archive(args.dst_path+"/spread_comlete", 'zip', args.dst_path + "/spread_image")
+
+

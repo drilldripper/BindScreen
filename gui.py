@@ -49,7 +49,10 @@ def main():
                               button_box_widget.get_instruction_direction(),
                               button_box_widget.get_opening_direction(),
                               button_box_widget.init_time_box.text(),
-                              button_box_widget.interval_time_box.text()))
+                              button_box_widget.interval_time_box.text(),
+                              button_box_widget.get_trim_checkbox(),
+                              button_box_widget.get_zip_checkbox()
+                              ))
 
     # ファイルパスをセットする
     button_box_widget.select_button.clicked.connect(
@@ -67,6 +70,9 @@ class ButtonBoxWidget(QtGui.QWidget):
     def setup_ui(self):
         self.start_button = QtGui.QPushButton("実行", parent=self)
         self.select_button = QtGui.QPushButton("フォルダ選択", parent=self)
+        self.check_trim = QtGui.QCheckBox("画像のトリミングを行う", self)
+        self.check_zip = QtGui.QCheckBox("圧縮フォルダを出力する", self)
+
 
         # 本の見開き方向
         self.opening_directions_radio = QtGui.QButtonGroup()
@@ -90,6 +96,8 @@ class ButtonBoxWidget(QtGui.QWidget):
         self.init_label = QtGui.QLabel('初期化時間(秒)',self)
         self.input_key_label = QtGui.QLabel('--キー入力--',self)
         self.opening_direction_label = QtGui.QLabel('--見開き方向--',self)
+        self.output_folder_path_label = QtGui.QLabel('出力先フォルダ',self)
+
 
         # フォルダパス名
         self.folder_path_box = QtGui.QLineEdit(self)
@@ -117,21 +125,25 @@ class ButtonBoxWidget(QtGui.QWidget):
         layout.addWidget(self.instruction_down_radio, 6, 4)
 
         layout.addWidget(self.folder_path_box, 7, 0, 7, 4)
-        layout.addWidget(self.select_button, 8, 0)
+        layout.addWidget(self.output_folder_path_label, 8, 0)
+        layout.addWidget(self.select_button, 8, 1)
+
+        layout.addWidget(self.check_trim, 3, 0, 3, 2)
+        layout.addWidget(self.check_zip, 4, 0, 4, 2)
 
         self.setLayout(layout)
 
 
-    # 本の見開きを取得
     def get_opening_direction(self):
+        """本の見開きを取得"""
         if self.opening_left_radio.isChecked() and not self.opening_right_radio.isChecked():
             return "LEFT"
         elif not self.opening_left_radio.isChecked() and self.opening_right_radio.isChecked():
             return "RIGHT"
         
 
-    # キーボードの命令を取得
     def get_instruction_direction(self):
+        """キーボードの命令を取得"""
         if self.instruction_left_radio.isChecked():
             return "{LEFT}"
         elif self.instruction_right_radio.isChecked():
@@ -141,6 +153,21 @@ class ButtonBoxWidget(QtGui.QWidget):
         elif self.instruction_down_radio.isChecked():
             return "{DOWN}"
 
+
+    def get_zip_checkbox(self):
+        """zipチェックボックスの状態を取得"""
+        if self.check_zip.isChecked():
+            return "--zip"
+        else:
+            return ""
+
+
+    def get_trim_checkbox(self):
+        """トリミングチェックボックスの状態を取得"""
+        if self.check_trim.isChecked():
+            return "--trim"
+        else:
+            return ""
 
 if __name__ == '__main__':
     main()
