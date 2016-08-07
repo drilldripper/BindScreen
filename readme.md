@@ -19,7 +19,8 @@ GUIを使う場合は以下のライブラリも必要になります。
 ## Usage
 gui.pyかexec.batを実行すると次の画面が表示されます。
 
-![main_gui](main_gui.png)
+
+![main_gif](demo/main_gui.png)
 
 - 実行
   - プログラムを実行します。
