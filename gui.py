@@ -8,19 +8,13 @@ import subprocess
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
-
-class ShowFolderDialog():
-    """フォルダを選ぶ"""
-    def __init__(self):
-        self.path_name = None
     
-    def show_folder_dialog(self, widget):
-        fd = QtGui.QFileDialog()
-        fp = fd.getExistingDirectory()
-        self.path_name = fp
-        self.path_name = '"' + self.path_name + '"'
-        widget.folder_path_box.setText(self.path_name)
-        print(fp)
+def show_folder_dialog(widget):
+    """GUIフォルダ選択"""
+    fd = QtGui.QFileDialog()
+    folder_path = fd.getExistingDirectory()
+    widget.folder_path_box.setText('"' + folder_path + '"')
+
 
 def ShowDirectory(*args):
     """CUIの引数付き実行"""
@@ -48,10 +42,10 @@ def main():
     main_window.setWindowTitle("スクリーン製本")
     main_window.setCentralWidget(panel)
     main_window.show()
-    show_folder_dialog = ShowFolderDialog()
-    # 本体の実行
+
+    # スクリプト実行
     button_box_widget.start_button.clicked.connect(
-        lambda: ShowDirectory(show_folder_dialog.path_name,
+        lambda: ShowDirectory(button_box_widget.folder_path_box.text(),
                               button_box_widget.get_instruction_direction(),
                               button_box_widget.get_opening_direction(),
                               button_box_widget.init_time_box.text(),
@@ -59,7 +53,7 @@ def main():
 
     # ファイルパスをセットする
     button_box_widget.select_button.clicked.connect(
-        lambda: show_folder_dialog.show_folder_dialog(button_box_widget))
+        lambda: show_folder_dialog(button_box_widget))
    
     app.exec_()
 
@@ -113,6 +107,7 @@ class ButtonBoxWidget(QtGui.QWidget):
         layout.addWidget(self.init_time_box, 2, 1)
         layout.addWidget(self.folder_path_box, 7, 0, 7, 4)
         self.setLayout(layout)
+
     
     # 本の見開きを取得
     def get_opening_direction(self):
