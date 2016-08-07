@@ -36,7 +36,7 @@ def main():
     panel_layout = QtGui.QVBoxLayout()
     panel_layout.addWidget(button_box_widget)
     panel.setLayout(panel_layout)
-    panel.setFixedSize(320, 200)
+    panel.setFixedSize(400, 300)
 
     main_window = QtGui.QMainWindow()
     main_window.setWindowTitle("スクリーン製本")
@@ -62,6 +62,7 @@ class ButtonBoxWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent=parent)
         self.setup_ui()
+        
 
     def setup_ui(self):
         self.start_button = QtGui.QPushButton("実行", parent=self)
@@ -78,50 +79,67 @@ class ButtonBoxWidget(QtGui.QWidget):
         self.opening_instructions_radio = QtGui.QButtonGroup()
         self.instruction_left_radio = QtGui.QRadioButton("←", parent=self)
         self.instruction_right_radio = QtGui.QRadioButton("→", parent=self)
+        self.instruction_up_radio = QtGui.QRadioButton("↑", parent=self)
+        self.instruction_down_radio = QtGui.QRadioButton("↓", parent=self)
         self.opening_instructions_radio.addButton(self.instruction_left_radio)
         self.opening_instructions_radio.addButton(self.instruction_right_radio)
+        self.opening_instructions_radio.addButton(self.instruction_up_radio)
+        self.opening_instructions_radio.addButton(self.instruction_down_radio)
 
-
-        self.capture_label = QtGui.QLabel('キャプチャ間隔',self)
-        self.init_label = QtGui.QLabel('初期化時間',self)
+        self.capture_label = QtGui.QLabel('キャプチャ間隔(秒)',self)
+        self.init_label = QtGui.QLabel('初期化時間(秒)',self)
+        self.input_key_label = QtGui.QLabel('--キー入力--',self)
+        self.opening_direction_label = QtGui.QLabel('--見開き方向--',self)
 
         # フォルダパス名
         self.folder_path_box = QtGui.QLineEdit(self)
-        
         # 撮影間隔
         self.interval_time_box = QtGui.QLineEdit(self)
-        
         # 初期化時間
         self.init_time_box = QtGui.QLineEdit(self)
 
         layout = QtGui.QGridLayout()
         layout.addWidget(self.start_button, 0, 0)
-        layout.addWidget(self.select_button, 0, 1)
-        layout.addWidget(self.capture_label, 1, 0)
-        layout.addWidget(self.interval_time_box, 1, 1)
-        layout.addWidget(self.opening_left_radio, 0, 2)
-        layout.addWidget(self.opening_right_radio, 0, 3)
-        layout.addWidget(self.instruction_left_radio, 1, 2)
-        layout.addWidget(self.instruction_right_radio, 1, 3)
         layout.addWidget(self.init_label, 2, 0)
         layout.addWidget(self.init_time_box, 2, 1)
+
+        layout.addWidget(self.capture_label, 1, 0)
+        layout.addWidget(self.interval_time_box, 1, 1)
+
+        layout.addWidget(self.opening_direction_label, 0, 3)
+        layout.addWidget(self.opening_left_radio, 1, 3)
+        layout.addWidget(self.opening_right_radio, 1, 5)
+
+        layout.addWidget(self.input_key_label, 3, 3)
+        layout.addWidget(self.instruction_left_radio, 5, 3)
+        layout.addWidget(self.instruction_right_radio, 5, 5)
+        layout.addWidget(self.instruction_up_radio, 4, 4)
+        layout.addWidget(self.instruction_down_radio, 6, 4)
+
         layout.addWidget(self.folder_path_box, 7, 0, 7, 4)
+        layout.addWidget(self.select_button, 8, 0)
+
         self.setLayout(layout)
 
-    
+
     # 本の見開きを取得
     def get_opening_direction(self):
         if self.opening_left_radio.isChecked() and not self.opening_right_radio.isChecked():
             return "LEFT"
         elif not self.opening_left_radio.isChecked() and self.opening_right_radio.isChecked():
             return "RIGHT"
+        
 
     # キーボードの命令を取得
     def get_instruction_direction(self):
-        if self.instruction_left_radio.isChecked() and not self.instruction_right_radio.isChecked():
+        if self.instruction_left_radio.isChecked():
             return "{LEFT}"
-        elif not self.instruction_left_radio.isChecked() and self.instruction_right_radio.isChecked():
+        elif self.instruction_right_radio.isChecked():
             return "{RIGHT}"
+        elif self.instruction_up_radio.isChecked():
+            return "{UP}"
+        elif self.instruction_down_radio.isChecked():
+            return "{DOWN}"
 
 
 if __name__ == '__main__':
