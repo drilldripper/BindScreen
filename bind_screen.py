@@ -14,15 +14,28 @@ def md5(filename):
 		data = f.read()
 	return hashlib.md5(data).hexdigest()
 
+def countdown(t):
+    while t:
+        mins, secs = divmod(int(t), 60)
+        timeformat = '{:02d}:{:02d}'.format(mins, secs)
+        print(timeformat, end='\r')
+        time.sleep(1)
+        t -= 1
+
+
 def take_picture(direction, init_time, interval_time, path):
     """画面が変化しなくなるまでスクリーンショットを撮る"""
+
     shell = win32com.client.Dispatch("WScript.Shell")
-    time.sleep(init_time)
+    countdown(init_time)
+    print("start to shot screen")
     img = ImageGrab.grab()
 
     spread_path = path + "/spread_image/"
     os.mkdir(spread_path)
     img.save(spread_path + "1.png")
+    print("1.png")
+
 
     i = 2
     while(1):
@@ -30,13 +43,14 @@ def take_picture(direction, init_time, interval_time, path):
         time.sleep(interval_time)
         img = ImageGrab.grab()
         img.save(spread_path + str(i)+".png")
+        print(str(i) + ".png")
+
 
         # 一つ前のスクリーンショットと同じ画像なら終了する
         if md5(spread_path + str(i) + ".png") == md5(spread_path + str(i-1) + ".png"):
             break
         i += 1 
-        print("next")
-    print("end")
+    print("To capture screen is complete")
 
 def split_image(path, direction = "RIGHT"):
     """画像を横に２分割する"""
@@ -119,5 +133,7 @@ if __name__ == "__main__":
         shutil.make_archive(args.dst_path+"/trim_complete", 'zip', args.dst_path + "/trim_image")
     elif args.zip and not args.trim:
         shutil.make_archive(args.dst_path+"/spread_comlete", 'zip', args.dst_path + "/spread_image")
+
+    print("processing is complet")
 
 
