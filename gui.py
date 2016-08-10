@@ -4,6 +4,7 @@ import bind_screen
 import sys
 import os
 import subprocess
+import random
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -16,7 +17,7 @@ def show_folder_dialog(widget):
     widget.folder_path_box.setText('"' + folder_path + '"')
 
 
-def ShowDirectory(*args):
+def exec_command(*args):
     """CUIの引数付き実行"""
     cmd = 'python bind_screen.py'
     print(args)
@@ -24,7 +25,7 @@ def ShowDirectory(*args):
         cmd += ' ' + arg
     print(cmd)
     subprocess.Popen(cmd)
-    # subprocess.call(cmd)
+
 
 def main():
     app = QtGui.QApplication(sys.argv)
@@ -43,9 +44,10 @@ def main():
     main_window.setCentralWidget(panel)
     main_window.show()
 
+
     # スクリプト実行
     button_box_widget.start_button.clicked.connect(
-        lambda: ShowDirectory(button_box_widget.folder_path_box.text(),
+        lambda: exec_command(button_box_widget.folder_path_box.text(),
                               button_box_widget.get_instruction_direction(),
                               button_box_widget.get_opening_direction(),
                               button_box_widget.init_time_box.text(),
@@ -57,8 +59,10 @@ def main():
     # ファイルパスをセットする
     button_box_widget.select_button.clicked.connect(
         lambda: show_folder_dialog(button_box_widget))
-   
+
+
     app.exec_()
+
 
 
 class ButtonBoxWidget(QtGui.QWidget):
@@ -83,21 +87,24 @@ class ButtonBoxWidget(QtGui.QWidget):
 
         # キーボード入力の方向
         self.opening_instructions_radio = QtGui.QButtonGroup()
-        self.instruction_left_radio = QtGui.QRadioButton("←", parent=self)
-        self.instruction_right_radio = QtGui.QRadioButton("→", parent=self)
-        self.instruction_up_radio = QtGui.QRadioButton("↑", parent=self)
-        self.instruction_down_radio = QtGui.QRadioButton("↓", parent=self)
+        self.instruction_left_radio = QtGui.QRadioButton("左キー", parent=self)
+        self.instruction_right_radio = QtGui.QRadioButton("右キー", parent=self)
+        self.instruction_up_radio = QtGui.QRadioButton("上キー", parent=self)
+        self.instruction_down_radio = QtGui.QRadioButton("下キー", parent=self)
+        self.instruction_noinput_radio = QtGui.QRadioButton("入力なし", parent=self)
+
         self.opening_instructions_radio.addButton(self.instruction_left_radio)
         self.opening_instructions_radio.addButton(self.instruction_right_radio)
         self.opening_instructions_radio.addButton(self.instruction_up_radio)
         self.opening_instructions_radio.addButton(self.instruction_down_radio)
+        self.opening_instructions_radio.addButton(self.instruction_noinput_radio)
+
 
         self.capture_label = QtGui.QLabel('キャプチャ間隔(秒)',self)
         self.init_label = QtGui.QLabel('初期化時間(秒)',self)
         self.input_key_label = QtGui.QLabel('--キー入力--',self)
         self.opening_direction_label = QtGui.QLabel('--見開き方向--',self)
         self.output_folder_path_label = QtGui.QLabel('出力先フォルダ',self)
-
 
         # フォルダパス名
         self.folder_path_box = QtGui.QLineEdit(self)
@@ -116,13 +123,15 @@ class ButtonBoxWidget(QtGui.QWidget):
 
         layout.addWidget(self.opening_direction_label, 0, 3)
         layout.addWidget(self.opening_left_radio, 1, 3)
-        layout.addWidget(self.opening_right_radio, 1, 5)
+        layout.addWidget(self.opening_right_radio, 1, 4)
 
         layout.addWidget(self.input_key_label, 3, 3)
         layout.addWidget(self.instruction_left_radio, 5, 3)
         layout.addWidget(self.instruction_right_radio, 5, 5)
         layout.addWidget(self.instruction_up_radio, 4, 4)
         layout.addWidget(self.instruction_down_radio, 6, 4)
+        layout.addWidget(self.instruction_noinput_radio, 5, 4)
+
 
         layout.addWidget(self.folder_path_box, 7, 0, 7, 4)
         layout.addWidget(self.output_folder_path_label, 8, 0)
@@ -140,7 +149,6 @@ class ButtonBoxWidget(QtGui.QWidget):
             return "LEFT"
         elif not self.opening_left_radio.isChecked() and self.opening_right_radio.isChecked():
             return "RIGHT"
-        
 
     def get_instruction_direction(self):
         """キーボードの命令を取得"""
@@ -152,6 +160,8 @@ class ButtonBoxWidget(QtGui.QWidget):
             return "{UP}"
         elif self.instruction_down_radio.isChecked():
             return "{DOWN}"
+        elif self.instruction_noinput_radio.isChecked():
+            return "NoneSendKey"
 
 
     def get_zip_checkbox(self):
@@ -168,6 +178,7 @@ class ButtonBoxWidget(QtGui.QWidget):
             return "--trim"
         else:
             return ""
+
 
 if __name__ == '__main__':
     main()

@@ -25,6 +25,10 @@ def countdown(t):
 
 def take_picture(direction, init_time, interval_time, path):
     """画面が変化しなくなるまでスクリーンショットを撮る"""
+    if direction == "NoneSendKey":
+        sendFlag = False
+    else:
+        sendFlag = True
 
     shell = win32com.client.Dispatch("WScript.Shell")
     countdown(init_time)
@@ -36,10 +40,10 @@ def take_picture(direction, init_time, interval_time, path):
     img.save(spread_path + "1.png")
     print("1.png")
 
-
     i = 2
     while(1):
-        shell.SendKeys(direction)
+        if sendFlag == True:
+            shell.SendKeys(direction)
         time.sleep(interval_time)
         img = ImageGrab.grab()
         img.save(spread_path + str(i)+".png")
