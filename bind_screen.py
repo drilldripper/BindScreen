@@ -138,6 +138,6 @@ if __name__ == "__main__":
     elif args.zip and not args.trim:
         shutil.make_archive(args.dst_path+"/spread_comlete", 'zip', args.dst_path + "/spread_image")
 
-    print("processing is complet")
+    print("processing is complete")
 
 
