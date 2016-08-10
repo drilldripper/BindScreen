@@ -5,26 +5,10 @@ import sys
 import os
 import subprocess
 import random
-
+import win32com.client
+import win32api
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-
-    
-def show_folder_dialog(widget):
-    """GUIフォルダ選択"""
-    fd = QtGui.QFileDialog()
-    folder_path = fd.getExistingDirectory()
-    widget.folder_path_box.setText('"' + folder_path + '"')
-
-
-def exec_command(*args):
-    """CUIの引数付き実行"""
-    cmd = 'python bind_screen.py'
-    print(args)
-    for arg in args:
-        cmd += ' ' + arg
-    print(cmd)
-    subprocess.Popen(cmd)
 
 
 def main():
@@ -37,17 +21,18 @@ def main():
     panel_layout = QtGui.QVBoxLayout()
     panel_layout.addWidget(button_box_widget)
     panel.setLayout(panel_layout)
-    panel.setFixedSize(400, 300)
+    panel.setFixedSize(450, 300)
+
+    exec_command = sendCUI()
 
     main_window = QtGui.QMainWindow()
     main_window.setWindowTitle("スクリーン製本")
     main_window.setCentralWidget(panel)
     main_window.show()
 
-
     # スクリプト実行
     button_box_widget.start_button.clicked.connect(
-        lambda: exec_command(button_box_widget.folder_path_box.text(),
+        lambda: exec_command.exec_command(button_box_widget.folder_path_box.text(),
                               button_box_widget.get_instruction_direction(),
                               button_box_widget.get_opening_direction(),
                               button_box_widget.init_time_box.text(),
@@ -56,10 +41,12 @@ def main():
                               button_box_widget.get_zip_checkbox()
                               ))
 
+    # スクリプト中断
+    button_box_widget.stop_button.clicked.connect(lambda: exec_command.send_interrpt())
+
     # ファイルパスをセットする
     button_box_widget.select_button.clicked.connect(
         lambda: show_folder_dialog(button_box_widget))
-
 
     app.exec_()
 
@@ -73,10 +60,10 @@ class ButtonBoxWidget(QtGui.QWidget):
 
     def setup_ui(self):
         self.start_button = QtGui.QPushButton("実行", parent=self)
+        self.stop_button = QtGui.QPushButton("中断", parent=self)
         self.select_button = QtGui.QPushButton("フォルダ選択", parent=self)
         self.check_trim = QtGui.QCheckBox("画像のトリミングを行う", self)
         self.check_zip = QtGui.QCheckBox("圧縮フォルダを出力する", self)
-
 
         # 本の見開き方向
         self.opening_directions_radio = QtGui.QButtonGroup()
@@ -115,6 +102,8 @@ class ButtonBoxWidget(QtGui.QWidget):
 
         layout = QtGui.QGridLayout()
         layout.addWidget(self.start_button, 0, 0)
+        layout.addWidget(self.stop_button, 0, 1)
+
         layout.addWidget(self.init_label, 2, 0)
         layout.addWidget(self.init_time_box, 2, 1)
 
@@ -178,6 +167,33 @@ class ButtonBoxWidget(QtGui.QWidget):
             return "--trim"
         else:
             return ""
+def show_folder_dialog(widget):
+    """GUIフォルダ選択"""
+    fd = QtGui.QFileDialog()
+    folder_path = fd.getExistingDirectory()
+    widget.folder_path_box.setText('"' + folder_path + '"')
+
+class sendCUI():
+    def __init__(self):
+        self.process = None
+
+    def exec_command(self, *args):
+        """CUIの引数付き実行"""
+        self.cmd = 'python bind_screen.py'
+        print(args)
+        for arg in args:
+            self.cmd += ' ' + arg
+        print(self.cmd)
+        self.process = subprocess.Popen(self.cmd)
+
+    def send_interrpt(self):
+        """プログラムの中断"""
+        if self.process == None:
+            print ("You didn't run a program")
+            return 
+        win32api.TerminateProcess(int(self.process._handle), -1)
+        print("process is interrupted")
+        print("If you want to continue this program, you must delete selected sub directory")
 
 
 if __name__ == '__main__':
