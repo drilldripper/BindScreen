@@ -26,7 +26,7 @@ def main():
     exec_command = sendCUI()
 
     main_window = QtGui.QMainWindow()
-    main_window.setWindowTitle("スクリーン製本")
+    main_window.setWindowTitle("BindScreen")
     main_window.setCentralWidget(panel)
     main_window.show()
 
